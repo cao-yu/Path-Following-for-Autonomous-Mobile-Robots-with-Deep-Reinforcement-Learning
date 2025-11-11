@@ -11,7 +11,7 @@ import matplotlib.patches as patch
 
 from kinematics import Unicycle, Logger
 from reference_path import ArcReferencePath
-from control_law import pure_pursuit_control
+from control_law_arc import pure_pursuit_control
 
 
 T = 60.0  # max simulation time [s]
@@ -192,4 +192,5 @@ if __name__ == '__main__':
         plt.ylabel("cross-track error [m]")
         
     plt.show()
+
 
