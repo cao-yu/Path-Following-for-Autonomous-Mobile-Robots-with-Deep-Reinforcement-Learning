@@ -150,8 +150,8 @@ class PathFollowingEnv(gym.Env):
         self.ax.set_title('Path Following')
         self.ax.set_aspect('equal')
         self.ax.grid()
-        plt.title(f"v:{self.mdl.v:.2f} [m/s], "
-                  r"$\omega$" f":{self.mdl.omega:.2f} [rad/s]")
+        plt.title(f"v:{self.mdl.v:.2f} m/s, "
+                  r"$\omega$" f":{self.mdl.omega:.2f} rad/s")
         
         self.ax.plot(self.path.x, self.path.y, 'k-', linewidth=2.5) # ref path
         #self.ax.plot(self.logger.x, self.logger.y, '--', color='lime', linewidth=2.5) # trajectory    
@@ -259,4 +259,5 @@ class RefPath:
         self.sn = 0.0
 
         self.sl = DEFAULT_L
+
 
