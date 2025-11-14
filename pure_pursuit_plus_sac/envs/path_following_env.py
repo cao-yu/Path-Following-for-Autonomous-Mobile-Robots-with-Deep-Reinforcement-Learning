@@ -163,7 +163,7 @@ class PathFollowingEnv(gym.Env):
 
         sc = self.ax.scatter(
             sac_x, sac_y,
-            s=50,
+            s=60,
             c=sac_v,
             edgecolors='face',
             cmap='jet',
@@ -259,3 +259,4 @@ class RefPath:
         self.sn = 0.0
 
         self.sl = DEFAULT_L
+
