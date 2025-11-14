@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # python eval_policy.py --policy SAC --eval_episodes 1 --load_model default --disp_ani
-# python eval_policy.py --policy SAC --eval_episodes 10 --load_model default
 
 import argparse
 import numpy as np
@@ -12,23 +11,27 @@ from algos import SAC
 from envs.path_following_env import PathFollowingEnv
 
 
+cbar = None
 
 """-------animation-------"""
 def update(i):  
+    global cbar
+
     # frame initialization
-    plt.cla()
-    plt.rcParams["font.size"] = 15
-    plt.subplots_adjust(top=0.95, bottom=0.05, left=0.15, right=0.95)
-    #ax.set_xlim(state.x[i] - 0.5, state.x[i] + 0.5) # robot centered
-    #ax.set_ylim(state.y[i] - 0.5, state.y[i] + 0.5)
+    ax.cla()
+    plt.rcParams["font.size"] = 12
+    plt.subplots_adjust(top=0.98, bottom=0.05, left=0.1, right=1)
+
     ax.set_xlim(min(rx) - 0.2, max(rx) + 0.2)
     ax.set_ylim(min(ry) - 0.2, max(ry) + 0.2)
     ax.set_xlabel('x [m]')
     ax.set_ylabel('y [m]')
     ax.set_aspect('equal')
     ax.grid(True) 
-    plt.title(f"t:{env.logger.t[i]:.2f} [s], v:{env.logger.v[i]:.2f} [m/s], "
-              r"$\omega$" f":{env.logger.omega[i-1]:.2f} [rad/s]")
+    plt.title(
+        f"t:{env.logger.t[i]:.2f} s, v:{env.logger.v[i]:.2f} m/s, "
+        r"$\omega$" f":{env.logger.omega[i-1]:.2f} rad/s"
+    )
     
     # reference path
     plt.plot(rx, ry, 'k', lw=3, label="Reference")
@@ -40,22 +43,50 @@ def update(i):
     plt.plot(rpath.X(ls_sl[i]), rpath.Y(ls_sl[i]), 'rx', markeredgewidth=3, ms=10, label="Lookahead Point")
 
     # trajectory
-    plt.plot(env.logger.x[0: i+1], env.logger.y[0: i+1], '--', lw=3, color='lime', label="Trajectory")
-    
-    # robot direction
-    #plt.arrow(state.x[i], state.y[i], 0.2*np.cos(state.yaw[i]), 0.2*np.sin(state.yaw[i]),
-    #          width=0.005, head_width=0.05, head_length=0.05,
-    #          fc='b', ec='k', alpha=0.5)
-    
+    #plt.plot(env.logger.x[0: i+1], env.logger.y[0: i+1], '--', lw=3, color='lime', label="Trajectory")
+
+    # ===== trajectory with velocity color =====
+    sac_x = env.logger.x[0: i+1]
+    sac_y = env.logger.y[0: i+1]
+    sac_v = env.logger.v[0: i+1]
+
+    sc = plt.scatter(
+        sac_x, sac_y,
+        s=60,
+        c=sac_v,
+        edgecolors='face',
+        cmap='jet',
+        vmin=0.0,
+        vmax=env.mdl.max_v
+    )
+
+    # Add colorbar only once
+    if cbar is None:
+        cbar = ax.figure.colorbar(sc, ax=ax)
+        cbar.ax.tick_params(labelsize=12)
+        cbar.set_label('Velocity [m/s]', fontsize=12)
+    # ==========================================
+
+    # eight
+    ax.legend(
+        loc='upper center', bbox_to_anchor=(0.5, 0.98),  
+        ncol=3, frameon=True, fontsize=10
+    )
+
+    # change
+    #ax.legend( 
+    #    loc='upper left', ncol=1,                      
+    #    frameon=True, fontsize=10
+    #)
+
     # robot
-    body, leftw, rightw = plot_robot(env.logger.x[i], env.logger.y[i], env.logger.yaw[i],
-                                     clr='b',alpha=0.5)
+    body, leftw, rightw = plot_robot(
+        env.logger.x[i], env.logger.y[i], env.logger.yaw[i],
+        clr='b', alpha=0.5
+    )
     bd = ax.add_patch(body)
     lw = ax.add_patch(leftw)
     rw = ax.add_patch(rightw)
-    
-    #plt.legend(loc='upper right', ncol=1)
-    #ax.legend(loc='upper center', bbox_to_anchor=(0.5, 1.2), ncol=4)
       
     return bd, lw, rw,
    
@@ -146,7 +177,8 @@ if __name__ == "__main__":
             avg_reward += reward
             avg_step += 1.0
             
-            if terminated or truncated:
+            #if terminated or truncated:
+            if env.path.check_truncation():
                 avg_vel += np.mean(env.logger.v)
                 break
 
@@ -173,13 +205,19 @@ if __name__ == "__main__":
     rx, ry = rpath.X(s), rpath.Y(s)
     
     if args.save_ani:   
-        fig, ax = plt.subplots(figsize=(7, 5)) 
-        anim = animation.FuncAnimation(fig, update, interval=1000*env.mdl.dt, frames=len(env.logger.t))
+        fig, ax = plt.subplots(figsize=(9, 5)) 
+        anim = animation.FuncAnimation(
+            fig, 
+            update, 
+            interval=1000*env.mdl.dt, 
+            frames=len(env.logger.t),
+            blit=False
+            )
         anim.save(f"ani_{args.path}.gif", writer='pillow')
+        plt.close(fig)
         
-    if not args.disp_ani and args.eval_episodes < 2:   
-        plt.close()
-        plt.subplots(1)
+    elif not args.disp_ani and args.eval_episodes < 2:   
+        plt.figure()
         plt.plot(rx, ry, lw=2, color="k", label="reference")
         plt.plot(env.logger.x, env.logger.y, "--", lw=2, color="lime", label="trajectory")
         plt.grid(True)
@@ -188,28 +226,28 @@ if __name__ == "__main__":
         plt.ylabel("y [m]")
         plt.legend()
         
-        plt.subplots(1)
+        plt.figure()
         plt.plot(env.logger.t, env.logger.v, "-r", lw=2)
         plt.grid(True)
         plt.xlabel("time [s]")
         plt.ylabel("Velocity [m/s]")
 
-        plt.subplots(1)
+        plt.figure()
         plt.plot(env.logger.t, np.rad2deg(env.logger.omega), "-r", lw=2)
         plt.grid(True)
         plt.xlabel("time [s]")
         plt.ylabel("Rotational Velocity [deg/s]")
               
-        plt.subplots(1)
+        plt.figure()
         plt.plot(env.logger.t, np.rad2deg(env.logger.yaw), "-r", lw=2)
         plt.grid(True)
         plt.xlabel("time [s]")
         plt.ylabel("Yaw Angle [deg]")
         
-        plt.subplots(1)
+        plt.figure()
         plt.plot(env.logger.t, ls_cte, "-r", lw=2)
         plt.grid(True)
         plt.xlabel("time [s]")
         plt.ylabel("cross-track error [m]")
         
-    plt.show()
+        plt.show()
