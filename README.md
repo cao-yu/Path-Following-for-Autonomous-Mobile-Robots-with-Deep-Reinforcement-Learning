@@ -13,17 +13,19 @@ This repository contains the source code for the paper "Path Following for Auton
 
 ## 🎮 Pure Pursuit Steering + SAC Velocity Control for Path Following
 
+These animations show our **Pure Pursuit + SAC controller** in action. In both cases, the trajectory is color-coded by **linear velocity**, highlighting how the learned policy adjusts speed based on the robot’s state relative to the path (including the nearest and lookahead points) and the upcoming path segment.
+
 <p align="center">
-  <img src="assets/ani_eight.gif" alt="Eight-shaped Path Following" width="50%">
-  <img src="assets/ani_change.gif" alt="Lane-change Path Following" width="50%">
+  <img src="assets/ani_eight.gif" alt="Eight-shaped Path Following" width="70%">
 </p>
 
-These animations show our **Pure Pursuit + SAC controller** in action:
+- **Eight-shaped path:** Pure Pursuit steers the robot, while SAC adapts the speed using the robot’s state relative to the path (including the nearest and lookahead points), slowing in demanding segments and accelerating where tracking is easier.  
 
-- **Left – Eight-shaped path:** Pure Pursuit handles the steering, while a SAC-based policy adapts the linear velocity to the local curvature, slowing down in tight turns and speeding up on straighter segments to keep the cross-track error small.
-- **Right – Lane-change path:** The controller uses both the nearest point and a lookahead point on the path. The SAC policy anticipates the upcoming lateral shift and smoothly adjusts the velocity profile so that Pure Pursuit can complete the lane change without large tracking errors.
+<p align="center">
+  <img src="assets/ani_change.gif" alt="Lane-change Path Following" width="70%">
+</p>
 
-In both cases, the trajectory is color-coded by **linear velocity**, highlighting how the learned policy adjusts speed according to the path curvature and the future path segment around the lookahead point.
+- **Lane-change path:** Using both the nearest and lookahead points, SAC shapes the velocity profile so that Pure Pursuit can anticipate the lateral shift and execute the lane change smoothly with small tracking error.
 
 ## 🌐 Generalization to Random Paths
 
