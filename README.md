@@ -30,8 +30,9 @@ In both cases, the trajectory is color-coded by **linear velocity**, highlightin
 ## 🌐 Generalization to Random Paths
 
 To test generalization, we evaluate the **Pure Pursuit + SAC controller** on randomly generated smooth paths that are not seen during training.  
-The starting point is randomly generated in the vicinity of (0, 0).
 
 <p align="center">
-  <img src="assets/rand_pf.jpg" alt="Random Path Following" width="80%">
+  <img src="assets/rand_pf.jpg" alt="Random Path Following" width="100%">
 </p>
+
+The starting point is randomly generated in the vicinity of (0, 0).
