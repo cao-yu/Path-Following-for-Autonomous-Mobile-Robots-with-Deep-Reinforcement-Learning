@@ -65,6 +65,7 @@ class PathFollowingEnv(gym.Env):
         
         # my render
         self.ax = None
+        self.cbar = None
        
     def step(self, action): 
         self.step_cnt += 1 # Increment instance variable
@@ -153,7 +154,30 @@ class PathFollowingEnv(gym.Env):
                   r"$\omega$" f":{self.mdl.omega:.2f} [rad/s]")
         
         self.ax.plot(self.path.x, self.path.y, 'k-', linewidth=2.5) # ref path
-        self.ax.plot(self.logger.x, self.logger.y, '--', color='lime', linewidth=2.5) # trajectory     
+        #self.ax.plot(self.logger.x, self.logger.y, '--', color='lime', linewidth=2.5) # trajectory    
+
+        # ===== trajectory with velocity color =====
+        sac_x = self.logger.x
+        sac_y = self.logger.y
+        sac_v = self.logger.v
+
+        sc = self.ax.scatter(
+            sac_x, sac_y,
+            s=50,
+            c=sac_v,
+            edgecolors='face',
+            cmap='jet',
+            vmin=0.0,
+            vmax=self.mdl.max_v
+        )
+
+        # Add colorbar only once
+        if self.cbar is None:
+            self.cbar = self.ax.figure.colorbar(sc, ax=self.ax)
+            self.cbar.ax.tick_params(labelsize=12)
+            self.cbar.set_label('Velocity [m/s]', fontsize=12)
+        # ==========================================
+        
         self.ax.add_patch(body)
         self.ax.add_patch(lw)
         self.ax.add_patch(rw)
@@ -233,4 +257,5 @@ class RefPath:
             self.x, self.y = self.path.X(s), self.path.Y(s)
             
         self.sn = 0.0
+
         self.sl = DEFAULT_L
