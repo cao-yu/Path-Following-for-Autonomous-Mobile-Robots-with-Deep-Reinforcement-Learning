@@ -12,8 +12,7 @@ This repository contains the source code for the paper **“Path Following for A
 
 ## 🎮 Pure Pursuit Steering + SAC Velocity Control
 
-These animations show our **Pure Pursuit + SAC controller** in action.  
-In both cases, the trajectory is color-coded by **linear velocity**, highlighting how the learned policy adjusts speed based on the robot’s state relative to the path (including the `nearest` and `lookahead` points).
+These animations show our **Pure Pursuit + SAC controller** in action. The trajectory is color-coded by **linear velocity**, highlighting how the learned policy adjusts speed based on the robot’s state relative to the path (including the `nearest` and `lookahead` points).
 
 <p align="center">
   <img src="assets/ani_eight.gif" alt="Eight-shaped Path Following" width="70%">
